@@ -9,25 +9,20 @@ def get_attempt_time(attempt_record):
     return student_tz.localize(utc_dt)
 
 
-def get_page_with_attempts(api_url, payload):
-    response = requests.get(api_url, payload)
-    return response.json()
-
-
 def get_attempts_and_next_page(api_url, page):
-    attempts = get_page_with_attempts(api_url, {'page': page})
-    is_next_page = attempts['page'] < attempts['number_of_pages']
-    return is_next_page, attempts['records']
+    attempts = requests.get(api_url, {'page': page}).json()
+    next_page = attempts['page'] + 1 \
+        if attempts['page'] < attempts['number_of_pages'] \
+        else 0
+    return next_page, attempts['records']
 
 
 def load_attempts(api_url):
-    page = 1
-    is_next_page = True
-
-    while is_next_page:
-        is_next_page, attempt_records = get_attempts_and_next_page(api_url,
-                                                                   page)
-        page += 1
+    next_page = 1
+    has_next_page = True
+    while next_page:
+        next_page, attempt_records = get_attempts_and_next_page(api_url,
+                                                                next_page)
         for record in attempt_records:
             if record['timestamp']:
                 yield record
@@ -40,7 +35,7 @@ def get_midnighters(attempt_records):
 
     for record in attempt_records:
         attempt_time = get_attempt_time(record)
-        if attempt_time.hour in range(min_hour, max_hour):
+        if min_hour < attempt_time.hour <= max_hour:
             midnighters.setdefault(record['username'],
                                    []).append(attempt_time)
     return midnighters
