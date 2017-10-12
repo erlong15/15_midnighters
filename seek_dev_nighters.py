@@ -1,6 +1,7 @@
 import requests
 import pytz
 from datetime import datetime
+from collections import defaultdict
 
 
 def get_attempt_time(attempt_record):
@@ -29,15 +30,13 @@ def load_attempts(api_url):
 
 
 def get_midnighters(attempt_records):
-    midnighters = {}
+    midnighters = defaultdict()
     min_hour = 0
     max_hour = 5
-
     for record in attempt_records:
         attempt_time = get_attempt_time(record)
         if min_hour < attempt_time.hour <= max_hour:
-            midnighters.setdefault(record['username'],
-                                   []).append(attempt_time)
+            midnighters[record['username']].append(attempt_time)
     return midnighters
 
 
