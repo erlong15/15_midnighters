@@ -30,7 +30,7 @@ def load_attempts(api_url):
 
 
 def get_midnighters(attempt_records):
-    midnighters = defaultdict()
+    midnighters = defaultdict(list)
     min_hour = 0
     max_hour = 5
     for record in attempt_records:
